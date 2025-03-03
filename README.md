@@ -1,30 +1,45 @@
 
-# Overview
+# Medi Score Calculation
+## Background
+Write a function to calculate the score for aa patient. This is a simple rule of thumb score used to identify ill patients.
+## Introduction
 
-Mediscore calculation is a python based scoring system
+The Mediscore calculation is a python based scoring system
 which is designed to assess a patients vital signs and detect their potential health issues.
 The following system follows a structured scoring model.
 The following features are used to determine the mediscore.
+
 **Respiration rate**, **Saturated oxygen level (SpO2)**, **consciousness**, **body temperature** and **oxygen usage**.
-For a more comprehensive assesment additional factors like **Capillary Blood Glucose (CBL)** are also included.
 
-This Medi-Score calculation system helps the health care profesionals quickly assess the 
-patients deterioration and issue alerts for significant changes.
-# Installation
-To use the medi score calculator, you need to install python 3.6 or higher.
-Following steps can be used:
+A score for each property is allocated as it is measured. The score for the property reflects how different the measurement is from the range of expected values.
 
-1.Clone the repository- <pre>git clone https://github.com/yourusername/medi-score.git
-cd medi-score</pre>
+The scores for each property are added together, and 2 additional points are added for patients requiring supplemental oxygen to maintain their oxygen saturation level. This final sum is the Medi score, which ranges from 0 to 14.
 
-2.Install dependencies- <pre> pip install -r requirements.txt</pre>
+## Thought process and Design Decisions
 
-3.Run the script-  <pre> python medi_score.py </pre>
+To calculate the Medi score efficiently, I followed these key steps:
 
-# Usage
-### Function- Calculate_Medi_score
+1.**Understanding the Requirements**- The code is based on five parameters.It follows a predefined scoring table. And the patients requiring oxygen get additional points.
+An alert should be triggered if the score increases by more than 2 in 24 hours.
 
-```calculate_medi_score``(respiration_rate, oxygen_saturation, consciousness, temperature, air_or_oxygen, cbg=None, fasting=None, previous_score=None```
+2.**Choosing a function structure**- I created a function calculate_medi_score()that takes vital signs as input. This validates the inputs to prevent errors. This returns the final score and an alert message if needed.
+
+3.**Handling edge cases**-
+Incorrect values (the negatve respiration rate)- trigger validation errors
+The function correctly differentiates between patients on oxygen and air
+The score system ensures no unfair advantage or miscalculation of the final medi score.
+
+4.**Adding efficiency and readability**
+Using **if-elif** conditions for scoring instead of multiple function calls
+Adding inline comments for better clarity
+
+# Application Requirements
+
+The Medi score for a patient is the sum of the scores for each property in the following table. Ranges are inclusive.
+
+Your function can either take these measures as separate parameters or take a single struct/object containing these values as attributes/properties.
+
+The Medi score for the patient should be returned as an integer.
 
 | Parameter          | Type   | Description                                      |
 |--------------------|--------|--------------------------------------------------|
@@ -69,7 +84,6 @@ cd medi-score</pre>
 | Confused/Unconscious (1) | -          | 3     |
 
 
-
 ### Temperature 
 
 | Temperature (°C) | Score           |
@@ -101,35 +115,15 @@ cd medi-score</pre>
 | ≥9.0           | 1                 |
 
 
-# Medi Score Explanation
+## Testing Strategy ##
 
-### Summary of Medi Scores
- 1.Score 0 (Normal): The patient’s vital signs are within the healthy range, and there are no immediate concerns.
+To ensure accuracy, I wrote unit tests in test_medi_score.py, covering:
+1.Normal and extreme values (e.g., very low oxygen, high fever)
+2.Patients with and without oxygen
+3.Patients with and without consciousness issues
+4.Edge cases (invalid inputs should raise errors)
 
- 2.Score 4 (Mild Concern): The patient is stable but requires closer monitoring, particularly if on supplemental oxygen or exhibiting mild symptoms.
-
- 3.Score 8 (Moderate Concern): The patient’s condition warrants more immediate attention. Vital signs are outside the normal range, and the patient may require further medical intervention.
-
-
-The Medi Score helps healthcare professionals quickly assess and respond to the patient’s health status. If the score changes significantly (by more than 2 points) within 24 hours, an alert will be triggered to signal possible deterioration in the patient’s condition.
-
-## Example Usage
-<pre>
-
-from medi_score import calculate_medi_score
-
-score, alert = calculate_medi_score(23, 88, 1, 38.5, 2, cbg=4.0, fasting=True, previous_score=5)
-print(f"Medi Score: {score}")
-if alert:
-    print(alert)
-
-</pre>
-# Output
-`Medi Score: 10
-ALERT: Medi Score increased by more than 2 points in 24 hours!`
-
-# Testing
-
+tests are run using,
 The repository includes unit tests to validate the scoring system. Run tests using:
 <pre>
 python -m unittest test_medi_score.py
@@ -152,3 +146,24 @@ class TestMediScore(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()</pre>
+
+## Challenges and Improvements ##
+Challenge: Handling patients on oxygen vs. air required special logic.
+
+Solution: I added conditions to apply different thresholds for oxygen users.
+
+Future Improvement: I could integrate more advanced trend monitoring to predict patient deterioration.
+## Bonus Features Implemented ##
+
+I have successfully implemented the bonus requirements as follows:
+
+1.Trend Alerts: If the score increases by more than 2 points in 24 hours, an alert is triggered.
+
+2.Capillary Blood Glucose (CBG) scoring: Additional health monitoring based on fasting/post-meal glucose levels.
+
+3.CBG score integration: The function calculates an additional score based on glucose levels when available.
+
+## Final Thoughts ##
+
+This project was a great opportunity for me to apply structured programming and medical scoring logic.The Medi Score system ensures patients are monitored accurately, and alerts provide an early warning for healthcare professionals. Future improvements could include integrating this system into a real-time monitoring platform with more predictive analytics for patient care.
+
